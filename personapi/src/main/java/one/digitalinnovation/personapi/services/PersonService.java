@@ -1,5 +1,8 @@
 package one.digitalinnovation.personapi.services;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,13 +37,7 @@ public class PersonService {
 //        return personMapper.toDTO(person);
 //    }
 
-//    public List<PersonDTO> listAll() {
-//        List<Person> people = personRepository.findAll();
-//        return people.stream()
-//                .map(personMapper::toDTO)
-//                .collect(Collectors.toList());
-//    }
-//
+//    
 //    public MessageResponseDTO update(Long id, PersonDTO personDTO) throws PersonNotFoundException {
 //        personRepository.findById(id)
 //                .orElseThrow(() -> new PersonNotFoundException(id));
@@ -65,4 +62,13 @@ public class PersonService {
                 .message(s + id2)
                 .build();
     }
+    
+    public List<PersonDTO> listAll() {
+		List<Person> people = personRepository.findAll();
+		return people.stream()
+				.map(personMapper::toDTO) //cada linha do map converte para DTO usando o mapper
+				.collect(Collectors.toList());
+	}
+
+	
 }
