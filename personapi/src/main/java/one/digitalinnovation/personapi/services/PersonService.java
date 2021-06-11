@@ -1,7 +1,6 @@
 package one.digitalinnovation.personapi.services;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,59 +18,75 @@ import one.digitalinnovation.personapi.repository.PersonRepository;
 @Service
 public class PersonService {
 
-    private final PersonRepository personRepository;
+	private final PersonRepository personRepository;
 
-    private final PersonMapper personMapper;
+	private final PersonMapper personMapper;
 
-    public MessageResponseDTO create(PersonDTO personDTO) {
-        Person person = personMapper.toModel(personDTO);
-        Person savedPerson = personRepository.save(person);
+	public MessageResponseDTO create(PersonDTO personDTO) {
+		Person person = personMapper.toModel(personDTO);
+		Person savedPerson = personRepository.save(person);
 
-        MessageResponseDTO messageResponse = createMessageResponse("Person successfully created with ID ", savedPerson.getId());
+		MessageResponseDTO messageResponse = createMessageResponse("Person successfully created with ID ",
+				savedPerson.getId());
 
-        return messageResponse;
-    }
+		return messageResponse;
+	}
 
-    private MessageResponseDTO createMessageResponse(String s, Long id2) {
-        return MessageResponseDTO.builder()
-                .message(s + id2)
-                .build();
-    }
-    
-    public List<PersonDTO> listAll() {
+
+	public List<PersonDTO> listAll() {
 		List<Person> people = personRepository.findAll();
-		return people.stream()
-				.map(personMapper::toDTO) //cada linha do map converte para DTO usando o mapper
+		return people.stream().map(personMapper::toDTO) // cada linha do map converte para DTO usando o mapper
 				.collect(Collectors.toList());
 	}
 
 	public PersonDTO findById(Long id) throws PersonNotFoundExceptio {
-		//a partir do java 8 tem optional person, que pode ser utilizado para
-		//verificar se a consulta tem resultado ou nao. Evitando o nulo
+		// a partir do java 8 tem optional person, que pode ser utilizado para
+		// verificar se a consulta tem resultado ou nao. Evitando o nulo
 //		Optional<Person> optionalPerson = personRepository.findById(id);
 //		if (optionalPerson.isEmpty()) {
 //			throw new PersonNotFoundExceptio(id);
 //		}
 //		
 //		return personMapper.toDTO(optionalPerson.get());
-		
-		//outra forma sem passar pelo optional, usando expressao lambda para err
+
+		// outra forma sem passar pelo optional, usando expressao lambda para err
 		Person person = verifyIfExists(id);
-		
+
 		return personMapper.toDTO(person);
 	}
 
 	public void delete(Long id) throws PersonNotFoundExceptio {
-		
+
 		verifyIfExists(id);
 		personRepository.deleteById(id);
 	}
-	
-	private Person verifyIfExists(Long id) throws PersonNotFoundExceptio {
+
+	public MessageResponseDTO update(Long id, PersonDTO personDTO) throws PersonNotFoundExceptio {
 		
-		return personRepository.findById(id)
-		.orElseThrow(() -> new PersonNotFoundExceptio(id));
+		verifyIfExists(id);
+		
+		Person personToUpdate = personMapper.toModel(personDTO);
+		
+		Person updatePerson = personRepository.save(personToUpdate);
+
+		MessageResponseDTO messageResponse = createMessageResponse
+				("Person successfully update with ID ", updatePerson.getId());
+
+		return messageResponse;
+	}
+	
+
+	private Person verifyIfExists(Long id) throws PersonNotFoundExceptio {
+
+		return personRepository.findById(id).orElseThrow(() -> new PersonNotFoundExceptio(id));
 	}
 
 	
+	private MessageResponseDTO createMessageResponse(String message, Long id) {
+		return MessageResponseDTO
+				.builder()
+				.message(message + id)
+				.build();
+	}
+
 }
