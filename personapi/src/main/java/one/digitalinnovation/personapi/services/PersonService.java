@@ -1,6 +1,7 @@
 package one.digitalinnovation.personapi.services;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import one.digitalinnovation.personapi.dto.mapper.PersonMapper;
 import one.digitalinnovation.personapi.dto.request.PersonDTO;
 import one.digitalinnovation.personapi.dto.response.MessageResponseDTO;
 import one.digitalinnovation.personapi.entities.Person;
+import one.digitalinnovation.personapi.exception.PersonNotFoundExceptio;
 import one.digitalinnovation.personapi.repository.PersonRepository;
 
 @AllArgsConstructor(onConstructor = @__(@Autowired))
@@ -68,6 +70,23 @@ public class PersonService {
 		return people.stream()
 				.map(personMapper::toDTO) //cada linha do map converte para DTO usando o mapper
 				.collect(Collectors.toList());
+	}
+
+	public PersonDTO findById(Long id) throws PersonNotFoundExceptio {
+		//a partir do java 8 tem optional person, que pode ser utilizado para
+		//verificar se a consulta tem resultado ou nao. Evitando o nulo
+//		Optional<Person> optionalPerson = personRepository.findById(id);
+//		if (optionalPerson.isEmpty()) {
+//			throw new PersonNotFoundExceptio(id);
+//		}
+//		
+//		return personMapper.toDTO(optionalPerson.get());
+		
+		//outra forma sem passar pelo optional, usando expressao lambda para err
+		Person person = personRepository.findById(id)
+		.orElseThrow(() -> new PersonNotFoundExceptio(id));
+		
+		return personMapper.toDTO(person);
 	}
 
 	
